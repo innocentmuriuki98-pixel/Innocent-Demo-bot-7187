@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>INNOCENT BOT — Boom 1000</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;600;700&display=swap');
+
+  :root {
+    --bg: #0a0e1a;
+    --card: #111827;
+    --border: #1e2d40;
+    --green: #00ff88;
+    --red: #ff3b5c;
+    --yellow: #ffd94a;
+    --blue: #38bdf8;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --mono: 'Share Tech Mono', monospace;
+    --sans: 'Inter', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    padding: 16px;
+  }
+
+  header {
+    text-align: center;
+    padding: 20px 0 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  header h1 {
+    font-family: var(--mono);
+    font-size: 1.4rem;
+    color: var(--green);
+    letter-spacing: 3px;
+  }
+
+  header p {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 4px;
+    letter-spacing: 1px;
+  }
+
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+  }
+
+  .dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--muted);
+    flex-shrink: 0;
+  }
+  .dot.green { background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 1.5s infinite; }
+  .dot.red { background: var(--red); }
+  .dot.yellow { background: var(--yellow); }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+
+  .card label {
+    display: block;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .card .value {
+    font-family: var(--mono);
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+
+  .value.green { color: var(--green); }
+  .value.red { color: var(--red); }
+  .value.blue { color: var(--blue); }
+  .value.yellow { color: var(--yellow); }
+
+  .price-display {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+
+  .price-display label {
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .price-display .price {
+    font-family: var(--mono);
+    font-size: 2rem;
+    color: var(--blue);
+    margin: 6px 0 2px;
+  }
+
+  .spike-meter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+
+  .spike-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .spike-fill {
+    height: 100%;
+    background: var(--green);
+    width: 0%;
+    transition: width 0.3s ease, background 0.3s;
+    border-radius: 2px;
+  }
+
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  button {
+    flex: 1;
+    padding: 13px;
+    border: none;
+    border-radius: 10px;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+
+  button:active { transform: scale(0.97); }
+  button:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  #startBtn { background: var(--green); color: #0a0e1a; }
+  #stopBtn { background: var(--red); color: #fff; }
+
+  .log-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    height: 220px;
+    overflow-y: auto;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    line-height: 1.7;
+  }
+
+  .log-box::-webkit-scrollbar { width: 4px; }
+  .log-box::-webkit-scrollbar-track { background: transparent; }
+  .log-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .log-entry { display: flex; gap: 8px; }
+  .log-time { color: var(--muted); flex-shrink: 0; }
+  .log-msg.info { color: var(--text); }
+  .log-msg.success { color: var(--green); }
+  .log-msg.warn { color: var(--yellow); }
+  .log-msg.error { color: var(--red); }
+  .log-msg.spike { color: var(--blue); font-weight: bold; }
+
+  .trade-status {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+  }
+
+  .trade-status label {
+    font-size: 0.62rem;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .trade-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .trade-row:last-child { border-bottom: none; }
+  .trade-row span:first-child { color: var(--muted); }
+
+  .warning-box {
+    background: #1a1200;
+    border: 1px solid #3d2e00;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.72rem;
+    color: var(--yellow);
+    margin-bottom: 14px;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚡ INNOCENT BOT</h1>
+  <p>BOOM 1000 · DEMO MODE · SPIKE HUNTER</p>
+</header>
+
+<div class="warning-box">
+  ⚠️ Running on DEMO account. Never risk real money without extensive testing.
+</div>
+
+<div class="status-bar">
+  <div class="dot" id="connDot"></div>
+  <span id="connStatus">Not connected</span>
+</div>
+
+<div class="price-display">
+  <label>Live Price — Boom 1000</label>
+  <div class="price" id="livePrice">—</div>
+  <div class="spike-meter">
+    <span>Spike Probability</span>
+    <div class="spike-bar"><div class="spike-fill" id="spikeFill"></div></div>
+    <span id="spikePercent">0%</span>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <label>Balance</label>
+    <div class="value blue" id="balance">$—</div>
+  </div>
+  <div class="card">
+    <label>Session P&L</label>
+    <div class="value green" id="pnl">$0.00</div>
+  </div>
+  <div class="card">
+    <label>Wins</label>
+    <div class="value green" id="wins">0</div>
+  </div>
+  <div class="card">
+    <label>Losses</label>
+    <div class="value red" id="losses">0</div>
+  </div>
+</div>
+
+<div class="trade-status">
+  <label>Current Trade</label>
+  <div class="trade-row"><span>Status</span><span id="tradeStatus" style="color:var(--muted)">Waiting</span></div>
+  <div class="trade-row"><span>Contract ID</span><span id="contractId" style="color:var(--muted)">—</span></div>
+  <div class="trade-row"><span>Entry Price</span><span id="entryPrice" style="color:var(--muted)">—</span></div>
+  <div class="trade-row"><span>Stake</span><span style="color:var(--green)">$0.35</span></div>
+  <div class="trade-row"><span>Stop Loss</span><span style="color:var(--red)">$1.00</span></div>
+  <div class="trade-row"><span>Consec. Losses</span><span id="consecLosses" style="color:var(--yellow)">0</span></div>
+</div>
+
+<div class="controls">
+  <button id="startBtn" onclick="startBot()">▶ START BOT</button>
+  <button id="stopBtn" onclick="stopBot()" disabled>■ STOP</button>
+</div>
+
+<div class="log-box" id="logBox"></div>
+
+<script>
+const API_TOKEN = 'pat_b897547396f2735c1edd828d53970ec0fc5e88478b616aa4201ed38ec41abc81';
+const SYMBOL = 'BOOM1000';
+const STAKE = 0.35;
+const STOP_LOSS = 1.00;
+const TAKE_PROFIT_MULTIPLIER = 2.0; // 100% profit per trade
+const MAX_CONSEC_LOSSES = 3;
+
+let ws = null;
+let running = false;
+let inTrade = false;
+let currentContractId = null;
+let sessionPnl = 0;
+let wins = 0;
+let losses = 0;
+let consecLosses = 0;
+let tickHistory = [];
+let waitingAfterSpike = false;
+let waitTicksAfterSpike = 0;
+let totalLostThisSession = 0;
+
+function log(msg, type = 'info') {
+  const box = document.getElementById('logBox');
+  const now = new Date();
+  const time = now.toTimeString().slice(0,8);
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.innerHTML = `<span class="log-time">${time}</span><span class="log-msg ${type}">${msg}</span>`;
+  box.appendChild(entry);
+  box.scrollTop = box.scrollHeight;
+}
+
+function setConnStatus(text, color) {
+  document.getElementById('connStatus').textContent = text;
+  const dot = document.getElementById('connDot');
+  dot.className = 'dot ' + color;
+}
+
+function updateUI() {
+  document.getElementById('pnl').textContent = (sessionPnl >= 0 ? '+' : '') + '$' + sessionPnl.toFixed(2);
+  document.getElementById('pnl').className = 'value ' + (sessionPnl >= 0 ? 'green' : 'red');
+  document.getElementById('wins').textContent = wins;
+  document.getElementById('losses').textContent = losses;
+  document.getElementById('consecLosses').textContent = consecLosses;
+}
+
+function detectSpike(ticks) {
+  if (ticks.length < 3) return { isSpike: false, probability: 0 };
+
+  const last = ticks[ticks.length - 1];
+  const prev = ticks[ticks.length - 2];
+  const prev2 = ticks[ticks.length - 3];
+
+  const change1 = Math.abs(last - prev);
+  const change2 = Math.abs(prev - prev2);
+
+  // Calculate average movement over last 20 ticks
+  let avgMove = 0;
+  if (ticks.length >= 20) {
+    for (let i = ticks.length - 20; i < ticks.length - 1; i++) {
+      avgMove += Math.abs(ticks[i+1] - ticks[i]);
+    }
+    avgMove /= 19;
+  } else {
+    avgMove = change2;
+  }
+
+  // A spike is when the last tick moved more than 5x the average
+  const spikeThreshold = avgMove * 5;
+  const isSpike = change1 > spikeThreshold && change1 > 0.5;
+
+  // Probability meter (0-100)
+  let probability = 0;
+  if (avgMove > 0) {
+    probability = Math.min(100, Math.round((change1 / spikeThreshold) * 100));
+  }
+
+  return { isSpike, probability, change: change1, avg: avgMove };
+}
+
+function updateSpikeMeter(probability) {
+  const fill = document.getElementById('spikeFill');
+  const pct = document.getElementById('spikePercent');
+  fill.style.width = probability + '%';
+  fill.style.background = probability > 80 ? 'var(--red)' : probability > 50 ? 'var(--yellow)' : 'var(--green)';
+  pct.textContent = probability + '%';
+}
+
+function sendMsg(msg) {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify(msg));
+  }
+}
+
+function getBalance() {
+  sendMsg({ balance: 1, subscribe: 1 });
+}
+
+function subscribeTicks() {
+  sendMsg({ ticks: SYMBOL, subscribe: 1 });
+  log('Subscribed to Boom 1000 tick stream', 'info');
+}
+
+function placeTrade() {
+  if (inTrade || !running) return;
+  if (consecLosses >= MAX_CONSEC_LOSSES) {
+    log(`⛔ Paused — ${MAX_CONSEC_LOSSES} consecutive losses reached. Restart to resume.`, 'warn');
+    stopBot();
+    return;
+  }
+  if (totalLostThisSession >= STOP_LOSS) {
+    log('⛔ Session stop loss of $1.00 reached. Bot stopped.', 'error');
+    stopBot();
+    return;
+  }
+
+  log('📋 Getting trade proposal...', 'info');
+  sendMsg({
+    proposal: 1,
+    amount: STAKE,
+    basis: 'stake',
+    contract_type: 'CALL',
+    currency: 'USD',
+    duration: 5,
+    duration_unit: 't',
+    symbol: SYMBOL
+  });
+}
+
+function buyContract(proposalId) {
+  log(`🛒 Buying contract...`, 'info');
+  sendMsg({ buy: proposalId, price: STAKE });
+}
+
+function checkContract(contractId) {
+  sendMsg({ proposal_open_contract: 1, contract_id: contractId, subscribe: 1 });
+}
+
+function handleMessage(data) {
+  // Balance update
+  if (data.msg_type === 'balance') {
+    const bal = parseFloat(data.balance.balance).toFixed(2);
+    document.getElementById('balance').textContent = '$' + bal;
+    return;
+  }
+
+  // Tick data
+  if (data.msg_type === 'tick') {
+    const price = data.tick.quote;
+    document.getElementById('livePrice').textContent = parseFloat(price).toFixed(4);
+    tickHistory.push(parseFloat(price));
+    if (tickHistory.length > 100) tickHistory.shift();
+
+    const { isSpike, probability } = detectSpike(tickHistory);
+    updateSpikeMeter(probability);
+
+    if (!running || inTrade) return;
+
+    if (isSpike) {
+      log(`⚡ SPIKE DETECTED! Waiting 2 ticks to confirm...`, 'spike');
+      waitingAfterSpike = true;
+      waitTicksAfterSpike = 0;
+      return;
+    }
+
+    if (waitingAfterSpike) {
+      waitTicksAfterSpike++;
+      if (waitTicksAfterSpike >= 2) {
+        waitingAfterSpike = false;
+        waitTicksAfterSpike = 0;
+        log('✅ Spike confirmed — entering trade!', 'success');
+        placeTrade();
+      }
+    }
+    return;
+  }
+
+  // Proposal response
+  if (data.msg_type === 'proposal') {
+    if (data.error) {
+      log('❌ Proposal error: ' + data.error.message, 'error');
+      return;
+    }
+    const proposalId = data.proposal.id;
+    log(`📊 Proposal received. Buying now...`, 'info');
+    buyContract(proposalId);
+    return;
+  }
+
+  // Buy response
+  if (data.msg_type === 'buy') {
+    if (data.error) {
+      log('❌ Buy error: ' + data.error.message, 'error');
+      inTrade = false;
+      return;
+    }
+    inTrade = true;
+    currentContractId = data.buy.contract_id;
+    document.getElementById('tradeStatus').textContent = '🟢 OPEN';
+    document.getElementById('tradeStatus').style.color = 'var(--green)';
+    document.getElementById('contractId').textContent = currentContractId;
+    document.getElementById('entryPrice').textContent = parseFloat(data.buy.buy_price).toFixed(4);
+    log(`✅ Trade opened! Contract: ${currentContractId}`, 'success');
+    checkContract(currentContractId);
+    return;
+  }
+
+  // Contract update (profit/loss tracking)
+  if (data.msg_type === 'proposal_open_contract') {
+    if (data.error) return;
+    const contract = data.proposal_open_contract;
+    if (!contract) return;
+
+    const profit = parseFloat(contract.profit || 0);
+    const status = contract.status;
+
+    // Auto close if profit hits 2x stake (100% profit)
+    const targetProfit = STAKE * (TAKE_PROFIT_MULTIPLIER - 1);
+    if (!contract.is_sold && profit >= targetProfit) {
+      log(`🎯 Take profit hit ($${profit.toFixed(2)})! Closing trade...`, 'success');
+      sendMsg({ sell: currentContractId, price: 0 });
+    }
+
+    // Contract closed
+    if (contract.is_sold) {
+      const finalProfit = parseFloat(contract.profit);
+      sessionPnl += finalProfit;
+
+      if (finalProfit >= 0) {
+        wins++;
+        consecLosses = 0;
+        log(`💰 WIN! Profit: +$${finalProfit.toFixed(2)}`, 'success');
+      } else {
+        losses++;
+        consecLosses++;
+        totalLostThisSession += Math.abs(finalProfit);
+        log(`💸 LOSS: -$${Math.abs(finalProfit).toFixed(2)} | Consecutive: ${consecLosses}`, 'error');
+      }
+
+      inTrade = false;
+      currentContractId = null;
+      document.getElementById('tradeStatus').textContent = 'Waiting';
+      document.getElementById('tradeStatus').style.color = 'var(--muted)';
+      document.getElementById('contractId').textContent = '—';
+      document.getElementById('entryPrice').textContent = '—';
+
+      updateUI();
+
+      if (totalLostThisSession >= STOP_LOSS) {
+        log('⛔ Total session loss reached $1.00. Bot stopped for protection.', 'error');
+        stopBot();
+        return;
+      }
+
+      if (consecLosses >= MAX_CONSEC_LOSSES) {
+        log(`⛔ ${MAX_CONSEC_LOSSES} losses in a row. Bot paused for safety.`, 'warn');
+        stopBot();
+        return;
+      }
+
+      log('👁 Watching for next spike...', 'info');
+    }
+    return;
+  }
+
+  if (data.error) {
+    log('⚠️ API Error: ' + data.error.message, 'error');
+  }
+}
+
+function startBot() {
+  if (running) return;
+  running = true;
+  tickHistory = [];
+  waitingAfterSpike = false;
+  totalLostThisSession = 0;
+
+  document.getElementById('startBtn').disabled = true;
+  document.getElementById('stopBtn').disabled = false;
+
+  log('🚀 Starting INNOCENT BOT...', 'info');
+  setConnStatus('Connecting...', 'yellow');
+
+  ws = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
+
+  ws.onopen = () => {
+    setConnStatus('Connected — Live', 'green');
+    log('🔗 Connected to Deriv API', 'success');
+    sendMsg({ authorize: API_TOKEN });
+  };
+
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+
+    if (data.msg_type === 'authorize') {
+      if (data.error) {
+        log('❌ Auth failed: ' + data.error.message, 'error');
+        stopBot();
+        return;
+      }
+      log('🔐 Authorized successfully', 'success');
+      getBalance();
+      subscribeTicks();
+    } else {
+      handleMessage(data);
+    }
+  };
+
+  ws.onerror = () => {
+    log('❌ WebSocket error. Check your connection.', 'error');
+    setConnStatus('Error', 'red');
+  };
+
+  ws.onclose = () => {
+    if (running) {
+      setConnStatus('Disconnected', 'red');
+      log('⚠️ Connection lost.', 'warn');
+    }
+  };
+}
+
+function stopBot() {
+  running = false;
+  inTrade = false;
+  if (ws) { ws.close(); ws = null; }
+  setConnStatus('Stopped', 'red');
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('stopBtn').disabled = true;
+  log('🛑 Bot stopped.', 'warn');
+  updateUI();
+}
+</script>
+</body>
+</html>
